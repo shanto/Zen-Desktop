@@ -320,7 +320,7 @@ jobs:
     if: ${{ github.event.inputs.create_release == 'true' }}
     permissions: write-all
     name: Release
-    needs: [build-data, linux, windows-step-3, check-release, mac, appimage, source]
+    needs: [build-data, windows-step-3, check-release, source]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event.inputs.update_branch == 'alpha' && 'Deploy-Release' || 'Deploy-Twilight' }}
@@ -381,24 +381,12 @@ jobs:
         with:
           files: |
             zen.source.tar.gz
-            zen.linux-generic.tar.bz2
-            zen.linux-specific.tar.bz2
-            zen-generic.AppImage
-            zen-generic.AppImage.zsync
-            zen-specific.AppImage
-            zen-specific.AppImage.zsync
             zen.win-generic.zip
             zen.win-specific.zip
-            linux.mar
-            linux-generic.mar
             windows-generic.mar
             windows.mar
-            macos-x64.mar
-            macos-aarch64.mar
             zen.installer.exe
             zen.installer-generic.exe
-            zen.macos-x64.dmg
-            zen.macos-aarch64.dmg
           tag_name: "twilight"
           name: "Twilight build - ${{ needs.build-data.outputs.version }} (${{ needs.build-data.outputs.build_date }})"
           body: |
@@ -423,24 +411,12 @@ jobs:
           title: 'Alpha build - ${{ needs.build-data.outputs.version }} (${{ needs.build-data.outputs.build_date }})'
           files: |
             zen.source.tar.gz
-            zen.linux-generic.tar.bz2
-            zen.linux-specific.tar.bz2
-            zen-generic.AppImage
-            zen-generic.AppImage.zsync
-            zen-specific.AppImage
-            zen-specific.AppImage.zsync
             .github/workflows/object/windows-x64-signed-generic/zen.win-generic.zip
             .github/workflows/object/windows-x64-signed-specific/zen.win-specific.zip
-            linux.mar
-            linux-generic.mar
             .github/workflows/object/windows-x64-signed-generic/windows-generic.mar
             .github/workflows/object/windows-x64-signed-specific/windows.mar
-            macos-x64.mar
-            macos-aarch64.mar
             .github/workflows/object/windows-x64-signed-specific/zen.installer.exe
             .github/workflows/object/windows-x64-signed-generic/zen.installer-generic.exe
-            zen.macos-x64.dmg
-            zen.macos-aarch64.dmg
 
   prepare-flatpak:
     if: ${{ github.event.inputs.create_release == 'true' && github.event.inputs.update_branch == 'alpha' }}
