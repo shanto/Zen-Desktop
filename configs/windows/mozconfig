@@ -43,11 +43,11 @@ else
   ac_add_options --enable-optimize="-O2 -mssse3 -msse4.1 -msse4.2 -mavx -maes -ftree-vectorize -Xclang -w"
   ac_add_options --enable-wasm-avx
 
-  export CFLAGS="-O2 -mssse3 -msse4.1 -msse4.2 -mavx -mfma -maes -march=x86-64-v2"   
-  export CPPFLAGS="-O2 -mssse3 -msse4.1 -msse4.2 -mavx -mfma -maes -march=x86-64-v2"
-  export CXXFLAGS="-O2 -flto=thin -mssse3 -msse4.1 -msse4.2 -mavx -mfma -maes -march=x86-64-v2"
+  export CFLAGS="-O2 -mssse3 -msse4.1 -msse4.2 -mavx -maes -march=x86-64-v2"   
+  export CPPFLAGS="-O2 -mssse3 -msse4.1 -msse4.2 -mavx -maes -march=x86-64-v2"
+  export CXXFLAGS="-O2 -flto=thin -mssse3 -msse4.1 -msse4.2 -mavx -maes -march=x86-64-v2"
   export LDFLAGS="-Wl,-O3 -march=x86-64-v2"
-  export RUSTFLAGS="-Clink-args=--icf=safe -C target-feature=+avx2 -C codegen-units=1 -Ctarget-cpu=x86-64-v2"    
+  export RUSTFLAGS="-C link-args=--icf=safe -C codegen-units=1 -C target-cpu=x86-64-v2"    
 fi
 export POLLY="-mllvm -polly -mllvm -polly-2nd-level-tiling -mllvm -polly-loopfusion-greedy -mllvm -polly-pattern-matching-based-opts -mllvm -polly-position=before-vectorizer -mllvm -polly-vectorizer=stripmine"
 export VERBOSE=1
