@@ -1,0 +1,271 @@
+name: Windows Release Build v2
+'on':
+  workflow_call:
+    inputs:
+      generate-gpo:
+        required: true
+        type: boolean
+        default: false
+      build-version:
+        description: The version to build
+        required: true
+        type: string
+      profile-data-path-archive:
+        description: The path to the zip archive containing the profile data
+        type: string
+      release-branch:
+        description: The branch to build
+        required: true
+        type: string
+jobs:
+  windows-build:
+    name: Build Windows - ${{ matrix.generic == true && 'Generic' || 'Specific' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        generic:
+          - false
+    environment: production
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: Jayllyz/free-disk-space@perf/use-rmz
+        with:
+          tool-cache: false
+      - name: Install Node.js and pnpm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.DEPLOY_KEY }}
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Setup git
+        run: 'git config --global user.email "mauro-balades@users.noreply.github.com"
+
+          git config --global user.name "mauro-balades"
+
+          '
+      - name: Install dependencies
+        run: 'pnpm i
+
+          '
+      - name: Load surfer CI setup
+        run: pnpm surfer ci --brand ${{ inputs.release-branch }} --display-version ${{ inputs.build-version }}
+      - name: Download
+        run: pnpm surfer download
+      - name: win-cross Cache
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
+        id: cache-win-cross
+        uses: actions/cache@v4
+        with:
+          path: ${HOME}/win-cross
+          key: win-cross
+      - name: Configure sccache
+        uses: actions/github-script@v7
+        with:
+          script: 'core.exportVariable(''ACTIONS_CACHE_URL'', process.env.ACTIONS_CACHE_URL || '''');
+
+            core.exportVariable(''ACTIONS_RUNTIME_TOKEN'', process.env.ACTIONS_RUNTIME_TOKEN || '''');
+
+            '
+      - name: Setup For Windows
+        if: steps.cache-win-cross.outputs.cache-hit != 'true'
+        run: 'set -x
+
+          mkdir -p ~/win-cross
+
+          cd engine/
+
+
+          echo Setup wine
+
+          aria2c "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.cache.level-1.toolchains.v3.linux64-wine.latest/artifacts/public%2Fbuild%2Fwine.tar.zst"
+          -o wine.tar.zst
+
+          tar --zstd -xvf wine.tar.zst -C ~/win-cross
+
+          rm wine.tar.zst
+
+
+          echo Setup Visual Studio
+
+          sudo apt install -y msitools python3-pip
+
+          ./mach python --virtualenv build taskcluster/scripts/misc/get_vs.py build/vs/vs2022.yaml ~/win-cross/vs2022
+
+          '
+      - name: Bootstrap
+        run: 'set -x
+
+          cd engine/
+
+
+          chmod -R +x "$(echo ~)/win-cross/vs2022" || true
+
+
+          cd ..
+
+          npm install -g pnpm
+
+          export SURFER_PLATFORM="win32"
+
+          pnpm surfer bootstrap
+
+
+          cd engine/
+
+          ls ~/.mozbuild/clang/lib/clang/
+
+          echo "export LIB=\"$(cd ~/.mozbuild/clang/lib/clang/* && cd lib/windows && pwd)\"" >> ../configs/common/mozconfig
+
+          cat ../configs/common/mozconfig
+
+
+          sudo apt-get update
+
+          sudo apt-get install dos2unix
+
+
+          ls ~/win-cross/wine || true
+
+          ls ~/win-cross/vs2022 || true
+
+          '
+      - name: setup Rust
+        run: 'cd engine/
+
+          # Install a rust version compatible with 17
+
+          curl --proto ''=https'' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.79
+
+          source $HOME/.cargo/env
+
+
+          rustup target add x86_64-pc-windows-msvc
+
+          cargo install cargo-download
+
+          cargo download -x windows=0.58.0
+
+          #? https://github.com/mozilla/sccache#known-caveats
+
+          export CARGO_INCREMENTAL=0
+
+
+          echo "" >> ../configs/common/mozconfig
+
+          echo "export MOZ_WINDOWS_RS_DIR=$(pwd)/windows-0.58.0" >> ../configs/common/mozconfig
+
+          '
+      - name: Import
+        env:
+          SURFER_COMPAT: ${{ matrix.generic == true }}
+        run: pnpm surfer import --verbose
+      - name: Build language packs
+        run: sh scripts/download-language-packs.sh
+      - uses: actions/download-artifact@v4
+        name: Download artifact if use profdata
+        if: ${{ !inputs.generate-gpo }}
+        with:
+          path: ~/artifact
+          name: windows-profdata-${{ matrix.generic == true && 'generic' || 'specific' }}
+      - name: Show artifact info
+        if: ${{ !inputs.generate-gpo }}
+        run: 'ls ~/artifact
+
+          ls ~/artifact/en-US.log
+
+          ls ~/artifact/merged.profdata
+
+
+          chmod +x ~/artifact/en-US.log
+
+          chmod +x ~/artifact/merged.profdata
+
+          '
+      - name: Build
+        env:
+          SURFER_COMPAT: ${{ matrix.generic == true }}
+        run: "set -x\ndos2unix configs/windows/mozconfig\nexport SURFER_PLATFORM=\"win32\"\nexport ZEN_CROSS_COMPILING=1\n\
+          if test ${{ inputs.generate-gpo }} = true; then\n  export ZEN_GA_GENERATE_PROFILE=1\nfi\nsh .github/workflows/src/release-build.sh\n"
+      - name: Package
+        env:
+          SURFER_COMPAT: ${{ matrix.generic == true }}
+        run: 'set -x
+
+          export SURFER_PLATFORM="win32"
+
+          pnpm package
+
+          mv ./dist/zen-$(pnpm surfer get version | xargs).en-US.win64.zip zen.win64.zip
+
+          ls ./dist
+
+          ls .
+
+          '
+      - name: 🐛 Debug Session
+        if: ${{ failure() }}
+        uses: Warpbuilds/gha-debug@v1.3
+        timeout-minutes: 15
+      - name: Move package for PGO upload
+        if: ${{ inputs.generate-gpo }}
+        run: 'set -x
+
+          mv ./zen.win64.zip ./zen.win64-pgo-stage-1.zip
+
+          '
+      - name: Rename artifacts
+        if: ${{ !inputs.generate-gpo }}
+        run: 'mv ./zen.win64.zip zen.win-${{ matrix.generic == true && ''generic'' || ''specific'' }}.zip
+
+          mv ./dist/output.mar windows${{ matrix.generic == true && ''-generic'' || '''' }}.mar
+
+          mv ./dist/zen.installer.exe ./zen.installer${{ matrix.generic == true && ''-generic'' || '''' }}.exe
+
+          '
+      - name: Upload PGO build
+        uses: actions/upload-artifact@v4
+        if: ${{ inputs.generate-gpo }}
+        with:
+          name: ${{ matrix.generic == true && 'generic' || 'specific' }}-${{ inputs.profile-data-path-archive }}
+          path: ./zen.win64-pgo-stage-1.zip
+      - name: Remove symlinks from obj folder
+        if: ${{ !inputs.generate-gpo }}
+        run: 'set -x
+
+          find engine/obj-x86_64-pc-windows-msvc/ -type l -delete
+
+          '
+      - name: Upload dist object
+        if: ${{ !inputs.generate-gpo }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-obj-${{ matrix.generic == true && 'generic' || 'specific' }}
+          path: engine/obj-x86_64-pc-windows-msvc/
+      - name: Upload zip file if twilight branch
+        if: ${{ inputs.release-branch == 'twilight' && !inputs.generate-gpo }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: zen.win-${{ matrix.generic == true && 'generic' || 'specific' }}.zip
+          path: ./zen.win-${{ matrix.generic == true && 'generic' || 'specific' }}.zip
+      - name: Upload installer if twilight branch
+        if: ${{ inputs.release-branch == 'twilight' && !inputs.generate-gpo }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: zen.installer${{ matrix.generic == true && '-generic' || '' }}.exe
+          path: ./zen.installer${{ matrix.generic == true && '-generic' || '' }}.exe
+      - name: Upload mar if twilight branch
+        if: ${{ inputs.release-branch == 'twilight' && !inputs.generate-gpo }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows${{ matrix.generic == true && '-generic' || '' }}.mar
+          path: ./windows${{ matrix.generic == true && '-generic' || '' }}.mar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zen.instaler.exe
+          path: ./zen.installer.exe

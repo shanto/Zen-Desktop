@@ -1,0 +1,15 @@
+name: Trigger Release Builds
+on:
+  workflow_run:
+    workflows: ['Patch Upstream']
+    types: [completed]
+    branches: ['build-v2']
+jobs:
+  build-wrapped:
+    permissions: write-all
+    secrets: inherit
+    uses: ./.github/workflows/build-v2.yml
+    with:
+      create_release: true
+      update_branch: alpha
+      update_version: false

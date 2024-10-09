@@ -1,0 +1,46 @@
+name: Patch Upstream
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+    - '.github/workflows/build-ext.yml'
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.DEPLOY_KEY }}
+    - name: Init
+      run: pip install yq
+    - name: Patch mozconfig
+      run: |
+        sed -i -E 's/ -msse3//g; s/ -mavx2//g; s/ -C.+avx2//g; s/ -mfma//g; s/64-v3/64-v2/g' ./configs/windows/mozconfig
+    - name: Patch windows-release-build.yml
+      run: |
+        yml=.github/workflows/windows-release-build.yml
+        yml2=${yml/build/build-v2}
+        cp $yml $yml2
+        yq -i -y -w120 '.jobs."windows-build".steps[-1] = {uses: "actions/upload-artifact@v4", with: {name: "zen.instaler.exe", path: "./zen.installer.exe"}}' $yml2
+        yq -i -y -w120 'del(.jobs."windows-build".strategy.matrix.generic[0])' $yml2
+        yq -i -y -w120 '.jobs."windows-build".steps[0].uses = "Jayllyz/free-disk-space@perf/use-rmz"' $yml2
+        yq -i -y -w120 '.name = "Windows Release Build v2"' $yml2
+    - name: Patch build.yml
+      run: |
+        yml=.github/workflows/build.yml
+        yml2=${yml/build/build-v2}
+        cp $yml $yml2
+        sed -i -E 's/windows-release-build.yml/windows-release-build-v2.yml/g' $yml
+        yq -i -y -w120 '.name = "Build Zen Win-x86-64-v2"' $yml2
+        yq -i -y -w120 '.jobs.release.needs = ["build-data", "windows-step-3", "check-release"]' $yml2
+        yq -i -y -w120 'del(.jobs["source","mac","release-homebrew","linux","appimage","prepare-flatpak","release-flatpak"])' $yml2
+        yq -i -y -w120 '.jobs.release.steps = [{uses: "actions/download-artifact@v4"}, .jobs.release.steps[-1]]' $yml2
+        yq -i -y -w120 '.jobs.release.steps[-1].with.files = "zen.installer.exe"' $yml2
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Patch workflow for V2

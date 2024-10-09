@@ -1,0 +1,225 @@
+name: Build Zen Win-x86-64-v2
+'on':
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: Create a new release for this build
+        required: false
+        default: false
+        type: boolean
+      update_version:
+        description: Update the version number
+        required: false
+        default: false
+        type: boolean
+      update_branch:
+        description: Update branch with new version
+        required: true
+        default: alpha
+        type: choice
+        options:
+          - alpha
+          - twilight
+  workflow_call:
+    inputs:
+      create_release:
+        description: Create a new release for this build
+        required: false
+        default: false
+        type: boolean
+      update_version:
+        description: Update the version number
+        required: false
+        default: false
+        type: boolean
+      update_branch:
+        description: Update branch with new version
+        required: true
+        default: alpha
+        type: string
+jobs:
+  debug-inputs:
+    name: Debug inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        run: 'echo "create_release: ${{ inputs.create_release }}"
+
+          echo "update_version: ${{ inputs.update_version }}"
+
+          echo "update_branch: ${{ inputs.update_branch }}"
+
+          echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+
+          echo "GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}"
+
+          echo "GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}"
+
+          echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+
+          '
+  build-data:
+    permissions:
+      contents: write
+    name: Generate build data
+    runs-on: ubuntu-latest
+    needs: debug-inputs
+    outputs:
+      build_date: ${{ steps.data.outputs.builddate }}
+      version: ${{ steps.data.outputs.version }}
+      build_time: ${{ steps.data.outputs.buildtime }}
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.DEPLOY_KEY }}
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: 'echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+          '
+      - name: Install dependencies
+        run: pnpm install
+      - name: Setup Surfer
+        run: 'npm i -g @zen-browser/surfer
+
+          '
+      - name: Bump version
+        if: ${{ inputs.update_version && inputs.update_branch == 'alpha' }}
+        run: 'pnpm surfer ci --brand ${{ inputs.update_branch }} --bump prerelease
+
+          '
+      - name: Bump version without new version
+        if: ${{ !inputs.update_version || inputs.update_branch == 'twilight' }}
+        run: 'pnpm surfer ci --brand ${{ inputs.update_branch }}
+
+          '
+      - name: Debug
+        run: 'surfer get version
+
+          surfer get version | xargs
+
+          echo "$(surfer get version | xargs)"
+
+          '
+      - name: Export release date
+        id: data
+        shell: bash
+        run: 'echo "builddate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+
+          echo "version=$(surfer get version | xargs)" >> $GITHUB_OUTPUT
+
+          echo "buildtime=$(date +"%H:%M:%S")" >> $GITHUB_OUTPUT
+
+          '
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ inputs.update_version }}
+        with:
+          commit_message: 🔖 Update version to ${{ steps.data.outputs.version }}
+          commit_user_name: Zen Browser Robot
+          commit_user_email: zen-browser-bot@users.noreply.github.com
+  check-release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-data
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.DEPLOY_KEY }}
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: 'echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+          '
+      - name: Install dependencies
+        run: pnpm install
+      - name: Setup surfer
+        run: 'npm i -g @zen-browser/surfer
+
+          '
+      - name: Activate surfer CLI
+        run: 'echo "There''s a bug in the surfer CLI, we run this so that surfer sets everything up correctly"
+
+          pnpm surfer ci --brand ${{ inputs.update_branch }} --display-version ${{ needs.build-data.outputs.version }}
+
+          '
+      - name: Check version
+        run: "echo \"$(pwd)\"\nls .\necho \"version=$(pnpm surfer get version | xargs)\" >> $GITHUB_OUTPUT\nif [[ $(pnpm surfer\
+          \ get version | xargs) == ${{ needs.build-data.outputs.version }} ]]; then\n  echo \">>> Version matches\"\nelse\n\
+          \  echo \">>> Version mismatch\"\n  exit 1\nfi\n"
+  windows-step-1:
+    name: Windows build step 1 (PGO build)
+    uses: ./.github/workflows/windows-release-build-v2.yml
+    needs:
+      - build-data
+    permissions:
+      contents: write
+    secrets: inherit
+    with:
+      build-version: ${{ needs.build-data.outputs.version }}
+      generate-gpo: true
+      profile-data-path-archive: zen-windows-x86_64-profile-data-and-jarlog.zip
+      release-branch: ${{ inputs.update_branch }}
+  windows-step-2:
+    name: Windows build step 2 (Generate profile data)
+    uses: ./.github/workflows/windows-profile-build.yml
+    permissions:
+      contents: write
+    secrets: inherit
+    needs:
+      - windows-step-1
+      - build-data
+    with:
+      build-version: ${{ needs.build-data.outputs.version }}
+      profile-data-path-archive: zen.win64-pgo-stage-1.zip
+      release-branch: ${{ inputs.update_branch }}
+  windows-step-3:
+    name: Windows build step 3 (build with profile data)
+    uses: ./.github/workflows/windows-release-build-v2.yml
+    permissions:
+      contents: write
+    secrets: inherit
+    needs:
+      - build-data
+      - windows-step-2
+    with:
+      build-version: ${{ needs.build-data.outputs.version }}
+      generate-gpo: false
+      release-branch: ${{ inputs.update_branch }}
+  release:
+    if: ${{ inputs.create_release || inputs.update_branch == 'twilight' }}
+    permissions: write-all
+    name: Release
+    needs:
+      - build-data
+      - windows-step-3
+      - check-release
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.update_branch == 'alpha' && 'Deploy-Release' || 'Deploy-Twilight' }}
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: release-github
+        uses: marvinpinto/action-automatic-releases@latest
+        if: ${{ inputs.update_branch == 'alpha' }}
+        with:
+          repo_token: ${{ secrets.DEPLOY_KEY }}
+          automatic_release_tag: ${{ needs.build-data.outputs.version }}
+          prerelease: false
+          title: Alpha build - ${{ needs.build-data.outputs.version }} (${{ needs.build-data.outputs.build_date }})
+          files: zen.installer.exe
