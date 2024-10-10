@@ -30,13 +30,21 @@ jobs:
         yq -i -y -w120 'del(.jobs."windows-build".strategy.matrix.generic[0])' $yml2
         yq -i -y -w120 '.jobs."windows-build".steps[0].uses = "Jayllyz/free-disk-space@perf/use-rmz"' $yml2
         yq -i -y -w120 '.name = "Windows Release Build v2"' $yml2
+    - name: Patch windows-profile-build.yml
+      run: |
+        yml=.github/workflows/windows-profile-build.yml
+        yml2=${yml/build/build-v2}
+        cp $yml $yml2
+        yq -i -y -w120 'del(.jobs."windows-profile-build".strategy.matrix.generic[0])' $yml2
+        yq -i -y -w120 '.name = "Windows PGO Build v2"' $yml2
     - name: Patch build.yml
       run: |
         yml=.github/workflows/build.yml
         yml2=${yml/build/build-v2}
         cp $yml $yml2
-        sed -i -E 's/windows-release-build.yml/windows-release-build-v2.yml/g' $yml
-        yq -i -y -w120 '.name = "Build Zen Win-x86-64-v2"' $yml2
+        sed -i -E 's/windows-release-build.yml/windows-release-build-v2.yml/g' $yml2
+        sed -i -E 's/windows-profile-build.yml/windows-profile-build-v2.yml/g' $yml2
+        yq -i -y -w120 '.name = "Build Win x86-64-v2"' $yml2
         yq -i -y -w120 '.jobs.release.needs = ["build-data", "windows-step-3", "check-release"]' $yml2
         yq -i -y -w120 'del(.jobs["source","mac","release-homebrew","linux","appimage","prepare-flatpak","release-flatpak"])' $yml2
         yq -i -y -w120 '.jobs.release.steps = [{uses: "actions/download-artifact@v4"}, .jobs.release.steps[-1]]' $yml2
