@@ -1,4 +1,4 @@
-name: Build Zen Win-x86-64-v2
+name: Build Win x86-64-v2
 'on':
   workflow_dispatch:
     inputs:
@@ -177,7 +177,7 @@ jobs:
       release-branch: ${{ inputs.update_branch }}
   windows-step-2:
     name: Windows build step 2 (Generate profile data)
-    uses: ./.github/workflows/windows-profile-build.yml
+    uses: ./.github/workflows/windows-profile-build-v2.yml
     permissions:
       contents: write
     secrets: inherit

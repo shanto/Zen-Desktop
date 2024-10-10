@@ -267,5 +267,5 @@ jobs:
           path: ./windows${{ matrix.generic == true && '-generic' || '' }}.mar
       - uses: actions/upload-artifact@v4
         with:
-          name: zen.instaler.exe
+          name: zen.installer.exe
           path: ./zen.installer.exe
