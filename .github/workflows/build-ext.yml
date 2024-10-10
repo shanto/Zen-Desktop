@@ -26,7 +26,7 @@ jobs:
         yml=.github/workflows/windows-release-build.yml
         yml2=${yml/build/build-v2}
         cp $yml $yml2
-        yq -i -y -w120 '.jobs."windows-build".steps[-1] = {uses: "actions/upload-artifact@v4", with: {name: "zen.instaler.exe", path: "./zen.installer.exe"}}' $yml2
+        yq -i -y -w120 '.jobs."windows-build".steps[-1] = {uses: "actions/upload-artifact@v4", with: {name: "zen.installer.exe", path: "./zen.installer.exe"}}' $yml2
         yq -i -y -w120 'del(.jobs."windows-build".strategy.matrix.generic[0])' $yml2
         yq -i -y -w120 '.jobs."windows-build".steps[0].uses = "Jayllyz/free-disk-space@perf/use-rmz"' $yml2
         yq -i -y -w120 '.name = "Windows Release Build v2"' $yml2
@@ -51,4 +51,9 @@ jobs:
         yq -i -y -w120 '.jobs.release.steps[-1].with.files = "zen.installer.exe"' $yml2
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: Patch workflow for V2
+        commit_message: Auto Patch V2
+    - name: Trigger Build
+      run: |
+        gh workflow run build-v2.yml -f create_release=true -f update_branch=alpha
+      env:
+        GH_TOKEN: ${{ secrets.DEPLOY_KEY }}
