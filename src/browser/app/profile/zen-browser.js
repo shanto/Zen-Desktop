@@ -103,7 +103,7 @@ pref('zen.view.sidebar-collapsed.hide-mute-button', true);
 pref('zen.tabs.dim-pending', true);
 pref('zen.tabs.newtab-on-middle-click', true);
 
-pref('zen.keyboard.shortcuts.enabled', true, locked);
+pref('zen.keyboard.shortcuts.enabled', true);
 pref('zen.keyboard.shortcuts.version', 0); // Empty string means default shortcuts
 
 pref('zen.themes.updated-value-observer', false);
@@ -135,6 +135,7 @@ pref('zen.workspaces.hide-default-container-indicator', true);
 pref('zen.workspaces.individual-pinned-tabs', true);
 pref('zen.workspaces.show-icon-strip', true);
 pref('zen.workspaces.icons', '["🌐", "📁", "💼", "📝", "📅", "📊","🧠"]');
+pref('services.sync.prefs.sync.zen.workspaces.icons', true);
 pref('services.sync.engine.workspaces', false);
 
 // Zen Watermark
