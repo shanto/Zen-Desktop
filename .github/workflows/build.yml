@@ -58,15 +58,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [debug-inputs]
     steps:
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
 
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.DEPLOY_KEY }}
+          fetch-depth: 0
 
       - name: Check if correct branch
         run: |
@@ -74,28 +71,17 @@ jobs:
           git branch
           git status
           git branch --show-current
-          branch="zen-${{ inputs.update_branch }}"
-          if [[ $branch == "zen-alpha" ]]; then
-            branch="zen-stable"
+          branch="${{ inputs.update_branch }}"
+          if [[ $branch == "alpha" ]]; then
+            branch="stable"
+          elif [[ $branch == "twilight" ]]; then
+            branch="dev"
           fi
           if [[ $(git branch --show-current) != $branch ]]; then
             echo ">>> Branch mismatch"
             exit 1
           else
             echo ">>> Branch matches"
-          fi
-
-      - name: Check if branch is up to date
-        run: |
-          echo "Checking if branch is up to date"
-          git fetch
-          git pull
-          git status
-          if [[ $(git status) == *"Your branch is up to date with"* ]]; then
-            echo ">>> Branch is up to date"
-          else
-            echo ">>> Branch is not up to date"
-            exit 1
           fi
 
   build-data:
@@ -218,7 +204,7 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     needs: [build-data, check-release]
-    environment: production
+    
     steps:
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -352,7 +338,7 @@ jobs:
         run: |
           npm install -g pnpm
           sudo apt-get update
-          sudo apt-get -y install libfuse2 desktop-file-utils
+          sudo apt-get -y install libfuse2 desktop-file-utils appstream 
 
       - name: Download linux build
         uses: actions/download-artifact@v4
@@ -367,7 +353,7 @@ jobs:
           cp configs/branding/${{ inputs.update_branch }}/logo128.png AppDir/zen.png && ln -s zen.png AppDir/.DirIcon
 
           if [ "${{ inputs.update_branch }}" = "twilight" ]; then
-            sed -i -e 's/Name=Zen Browser/name=Zen Twilight/g' AppDir/zen.desktop
+            sed -i -e 's/Name=Zen Browser/Name=Zen Twilight/g' AppDir/zen.desktop
           fi
 
           APPDIR=AppDir

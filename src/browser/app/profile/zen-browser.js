@@ -105,6 +105,7 @@ pref('zen.tabs.newtab-on-middle-click', true);
 
 pref('zen.keyboard.shortcuts.enabled', true);
 pref('zen.keyboard.shortcuts.version', 0); // Empty string means default shortcuts
+pref('zen.keyboard.shortcuts.disable-mainkeyset-clear', false); // for debugging
 
 pref('zen.themes.updated-value-observer', false);
 
@@ -157,7 +158,6 @@ pref('browser.migrate.opera-gx.enabled', true);
 pref('browser.migrate.opera.enabled', true);
 
 // DNS
-// pref('network.proxy.type', 0);
 // pref('network.trr.mode', 5);
 
 pref('xpinstall.signatures.required', false);
@@ -221,11 +221,17 @@ pref("devtools.accessibility.enabled", false);
 
 // Enable GPU by default
 pref('gfx.webrender.all', true);
+pref("gfx.canvas.accelerated", true);
+pref("media.hardware-video-decoding.enabled", true);
+
+// VAAPI/FFMPEG is Linux only
+#ifdef XP_UNIX
 pref('media.ffmpeg.vaapi.enabled', true);
 pref('media.ffmpeg.encoder.enabled', true);
-
-pref("media.hardware-video-decoding.enabled", true);
-pref("gfx.canvas.accelerated", true);
+#endif
 
 // Fix buffering issues: Youtube, Archive bugzilla.mozilla.org/show_bug.cgi?id=1854077
 pref("network.fetchpriority.enabled", true);
+
+// No Proxy should be default, Use system proxy allows antivirus, virus or system proxy to MITM or slowing down Zen
+pref("network.proxy.type", 0);

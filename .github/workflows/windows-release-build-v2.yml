@@ -26,7 +26,6 @@ jobs:
       matrix:
         generic:
           - false
-    environment: production
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: Jayllyz/free-disk-space@perf/use-rmz
@@ -234,11 +233,11 @@ jobs:
         with:
           name: ${{ matrix.generic == true && 'generic' || 'specific' }}-${{ inputs.profile-data-path-archive }}
           path: ./zen.win64-pgo-stage-1.zip
-      - name: Remove symlinks from obj folder
+      - name: Remove unnecessary files from obj
         if: ${{ !inputs.generate-gpo }}
         run: 'set -x
 
-          find engine/obj-x86_64-pc-windows-msvc/ -type l -delete
+          find engine/obj-x86_64-pc-windows-msvc/ -mindepth 1 -maxdepth 1 -type d -not -name ''dist'' -exec rm -rf {} +
 
           '
       - name: Upload dist object
