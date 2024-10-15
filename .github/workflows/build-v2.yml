@@ -68,11 +68,6 @@ jobs:
           submodules: recursive
           token: ${{ secrets.DEPLOY_KEY }}
           fetch-depth: 0
-      - name: Check if correct branch
-        run: "echo \"Checking if we are on the correct branch\"\ngit branch\ngit status\ngit branch --show-current\nbranch=\"\
-          ${{ inputs.update_branch }}\"\nif [[ $branch == \"alpha\" ]]; then\n  branch=\"stable\"\nelif [[ $branch == \"twilight\"\
-          \ ]]; then\n  branch=\"dev\"\nfi\nif [[ $(git branch --show-current) != $branch ]]; then\n  echo \">>> Branch mismatch\"\
-          \n  exit 1\nelse\n  echo \">>> Branch matches\"\nfi\n"
   build-data:
     permissions:
       contents: write
