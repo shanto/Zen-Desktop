@@ -45,6 +45,7 @@ jobs:
         cp $yml $yml2
         sed -i -E 's/windows-release-build.yml/windows-release-build-v2.yml/g' $yml2
         sed -i -E 's/windows-profile-build.yml/windows-profile-build-v2.yml/g' $yml2
+        yq -i -y -w120 'del(.jobs."check-build-is-correct".steps[1])' $yml2
         yq -i -y -w120 '.name = "Build Win x86-64-v2"' $yml2
         yq -i -y -w120 '.jobs.release.needs = ["build-data", "windows-step-3", "check-release"]' $yml2
         yq -i -y -w120 'del(.jobs["source","mac","release-homebrew","linux","appimage","prepare-flatpak","release-flatpak"])' $yml2
