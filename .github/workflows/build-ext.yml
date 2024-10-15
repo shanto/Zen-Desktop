@@ -8,6 +8,7 @@ on:
 
 jobs:
   patch:
+    name: Patch build workflows
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -49,11 +50,12 @@ jobs:
         yq -i -y -w120 'del(.jobs["source","mac","release-homebrew","linux","appimage","prepare-flatpak","release-flatpak"])' $yml2
         yq -i -y -w120 '.jobs.release.steps = [{uses: "actions/download-artifact@v4"}, .jobs.release.steps[-1]]' $yml2
         yq -i -y -w120 '.jobs.release.steps[-1].with.files = "zen.installer.exe"' $yml2
-    - uses: stefanzweifel/git-auto-commit-action@v5
+    - name: Commit modified workflows
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: Auto Patch V2
-    - name: Trigger Build
-      run: |
-        gh workflow run build-v2.yml -f create_release=true -f update_branch=alpha
+    - name: Trigger build workflow
       env:
         GH_TOKEN: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        gh workflow run build-v2.yml -f create_release=true -f update_branch=alpha
