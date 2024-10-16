@@ -132,10 +132,12 @@ pref('zen.splitView.rearrange-hover-size', 24);
 
 // Zen Workspaces
 pref('zen.workspaces.enabled', true);
+pref('zen.workspaces.hide-deactivated-workspaces', true);
 pref('zen.workspaces.hide-default-container-indicator', true);
 pref('zen.workspaces.individual-pinned-tabs', true);
 pref('zen.workspaces.show-icon-strip', true);
-pref('zen.workspaces.icons', '["🌐", "📁", "💼", "📝", "📅", "📊","🧠"]');
+pref('zen.workspaces.force-container-workspace', false);
+pref('zen.workspaces.icons', '["🌐", "📁", "💼", "📝", "📅", "📊", "🧠", "🚀", "🎯", "🔒", "💡", "🎨", "🛠️", "🧩", "💻", "📱", "🎓", "📚", "⚙️", "🎉", "🕹️", "🛒", "🔍","🧪","🔧","🗝️","🎧","🎮"]');
 pref('services.sync.prefs.sync.zen.workspaces.icons', true);
 pref('services.sync.engine.workspaces', false);
 
@@ -235,3 +237,8 @@ pref("network.fetchpriority.enabled", true);
 
 // No Proxy should be default, Use system proxy allows antivirus, virus or system proxy to MITM or slowing down Zen
 pref("network.proxy.type", 0);
+
+// ZEN EXPERIMENTAL:
+
+pref("security.tls.enable_kyber", true);
+pref("network.http.http3.enable_kyber", true);

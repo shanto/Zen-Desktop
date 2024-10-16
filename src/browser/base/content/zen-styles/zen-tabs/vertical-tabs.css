@@ -218,8 +218,6 @@
       flex-direction: row;
       justify-content: space-between;
 
-      padding-top: var(--zen-element-separation);
-
       width: 100%;
       position: relative;
 
@@ -474,15 +472,17 @@
             transform: translateY(50%) !important;
           }
 
-          :root:has(#navigator-toolbox:not([zen-right-side='true'])) &[active='true']::after {
-            left: -2px;
-            animation: zen-workspaces-button-active-collapsed-left 0.1s ease-in-out !important;
-          }
+          @media not (-moz-bool-pref: 'zen.workspaces.hide-deactivated-workspaces') {
+            :root:has(#navigator-toolbox:not([zen-right-side='true'])) &[active='true']::after {
+              left: -2px;
+              animation: zen-workspaces-button-active-collapsed-left 0.1s ease-in-out !important;
+            }
 
-          :root:has(#navigator-toolbox[zen-right-side='true']) &[active='true']::after {
-            left: unset !important;
-            right: -2px;
-            animation: zen-workspaces-button-active-collapsed-right 0.1s ease-in-out !important;
+            :root:has(#navigator-toolbox[zen-right-side='true']) &[active='true']::after {
+              left: unset !important;
+              right: -2px;
+              animation: zen-workspaces-button-active-collapsed-right 0.1s ease-in-out !important;
+            }
           }
         }
       }

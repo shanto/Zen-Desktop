@@ -3,8 +3,18 @@
             onpopuphidden="if (event.target == this) gZenBrowserManagerSidebar.contextTab = null;">
   <menuitem id="context_zenUnloadWebPanel" oncommand="gZenBrowserManagerSidebar.contextUnload();" data-l10n-id="zen-web-side-panel-context-unload"/>
   <menuitem id="context_zenToggleMuteWebPanel" oncommand="gZenBrowserManagerSidebar.contextToggleMuteAudio();"/>
-  <menuitem id="context_zenToogleUAWebPanel" oncommand="gZenBrowserManagerSidebar.contextToggleUserAgent();"/>
   <menuitem id="context_zenOpenNewTabWebPanel" oncommand="gZenBrowserManagerSidebar.contextOpenNewTab();" data-l10n-id="zen-web-side-panel-open-in-new-tab"/>
+  <menuseparator/>
+  <menu id="context_zenWebPanelContextInContainer"
+    data-l10n-id="zen-web-side-panel-context-open-in-container-tab"
+    selection-type="single"
+    node-type="link"
+    hide-if-private-browsing="true"
+    hide-if-usercontext-disabled="true">
+    <menupopup oncommand="gZenBrowserManagerSidebar.contextChangeContainerTab(event);"
+          onpopupshowing="return gZenBrowserManagerSidebar.createContainerTabMenu(event);" />
+  </menu>
+  <menuitem id="context_zenToogleUAWebPanel" oncommand="gZenBrowserManagerSidebar.contextToggleUserAgent();"/>
   <menuseparator/>
   <menuitem id="context_zenDeleteWebPanel" oncommand="gZenBrowserManagerSidebar.contextDelete();" data-l10n-id="zen-web-side-panel-context-delete"/>
 </menupopup>
@@ -114,10 +124,11 @@
       </vbox>
     </panelview>
     <panelview id="PanelUI-zen-workspaces-create" class="PanelUI-subView" role="document" mainview-with-header="true" has-custom-header="true">
-      <vbox>
+      <vbox class="PanelUI-zen-workspaces-user-create">
         <h1 data-l10n-id="zen-panel-ui-workspaces-create-text"></h1>
-        <html:input autofocus="true" id="PanelUI-zen-workspaces-create-input" type="text" placeholder="Enter workspace name" oninput="ZenWorkspaces.onWorkspaceCreationNameChange(this);" />
-        <hbox id="PanelUI-zen-workspaces-create-icons-container">
+        <hbox class="PanelUI-zen-workspaces-creation-wraper">
+          <hbox class="PanelUI-zen-workspaces-icons-container create" onclick="ZenWorkspaces.onWorkspaceIconContainerClick(event);"></hbox>
+          <html:input autofocus="true" id="PanelUI-zen-workspaces-create-input" type="text" placeholder="Enter workspace name" oninput="ZenWorkspaces.onWorkspaceCreationNameChange(this);" />
         </hbox>
       </vbox>
       <html:moz-button-group class="panel-footer" id="PanelUI-zen-workspaces-create-footer">
@@ -128,10 +139,11 @@
       </html:moz-button-group>
     </panelview>
     <panelview id="PanelUI-zen-workspaces-edit" class="PanelUI-subView" role="document" mainview-with-header="true" has-custom-header="true">
-      <vbox>
+      <vbox class="PanelUI-zen-workspaces-user-create">
         <h1 data-l10n-id="zen-panel-ui-workspaces-edit-text"></h1>
-        <html:input autofocus="true" id="PanelUI-zen-workspaces-edit-input" type="text" placeholder="Enter workspace name" oninput="ZenWorkspaces.onWorkspaceEditChange();" />
-        <hbox id="PanelUI-zen-workspaces-edit-icons-container">
+        <hbox class="PanelUI-zen-workspaces-creation-wraper">
+          <hbox class="PanelUI-zen-workspaces-icons-container edit" onclick="ZenWorkspaces.onWorkspaceIconContainerClick(event);"></hbox>
+          <html:input autofocus="true" id="PanelUI-zen-workspaces-edit-input" type="text" placeholder="Enter workspace name" oninput="ZenWorkspaces.onWorkspaceEditChange();" />
         </hbox>
       </vbox>
       <html:moz-button-group class="panel-footer" id="PanelUI-zen-workspaces-edit-footer">
@@ -142,11 +154,14 @@
       </html:moz-button-group>
     </panelview>
   </panelmultiview>
+  <panel type="arrow" role="menu" id="PanelUI-zen-workspaces-icon-picker" side="left">
+
+  </panel>
 </panel>
 
 <menupopup id="zenWorkspaceActionsMenu"
             onpopupshowing="ZenWorkspaces.updateContextMenu(this);"
-            onpopuphidden="ZenWorkspaces.onContextMenuClose();">
+            onpopuphidden="if (event.target == this) ZenWorkspaces.onContextMenuClose();">
   <menuitem id="context_zenOpenWorkspace" oncommand="ZenWorkspaces.openWorkspace();" data-l10n-id="zen-workspaces-panel-context-open"/>
   <menuseparator/>
   <menuitem id="context_zenSetAsDefaultWorkspace" oncommand="ZenWorkspaces.setDefaultWorkspace();" data-l10n-id="zen-workspaces-panel-context-set-default"/>

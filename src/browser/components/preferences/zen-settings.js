@@ -1021,6 +1021,11 @@ Preferences.addAll([
     default: false,
   },
   {
+    id: 'zen.workspaces.hide-deactivated-workspaces',
+    type: 'bool',
+    default: true,
+  },
+  {
     id: 'zen.pinned-tab-manager.restore-pinned-tabs-to-pinned-url',
     type: 'bool',
     default: true,
@@ -1029,5 +1034,10 @@ Preferences.addAll([
     id: 'zen.pinned-tab-manager.close-shortcut-behavior',
     type: 'string',
     default: 'switch',
+  },
+  {
+    id: 'zen.workspaces.force-container-workspace',
+    type: 'bool',
+    default: true,
   },
 ]);

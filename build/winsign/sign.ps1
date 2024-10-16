@@ -1,5 +1,6 @@
 param(
-    [string][Parameter(Mandatory=$true)]$SignIdentity
+    [string][Parameter(Mandatory=$true)]$SignIdentity,
+    [string][Parameter(Mandatory=$true)]$GithubRunId
 )
 
 $ErrorActionPreference = "Stop"
@@ -8,11 +9,12 @@ echo "Preparing environment"
 git pull --recurse-submodules
 mkdir windsign-temp -ErrorAction SilentlyContinue
 
-echo "Please UNZIP the generic and specific artifacts into windsign-temp"
-echo "With the following filenames:"
-echo "  - $pwd\windsign-temp\windows-x64-obj-specific"
-echo "  - $pwd\windsign-temp\windows-x64-obj-generic"
-Read-Host "Press Enter to continue when ready"
+# Download in parallel
+gh run download $GithubRunId --name windows-x64-obj-specific -D windsign-temp\windows-x64-obj-specific
+echo "Downloaded specific artifacts"
+gh run download $GithubRunId --name windows-x64-obj-generic -D windsign-temp\windows-x64-obj-generic
+echo "Downloaded generic artifacts"
+
 mkdir engine\obj-x86_64-pc-windows-msvc\ -ErrorAction SilentlyContinue
 mkdir .\.github\workflows\object\ -ErrorAction SilentlyContinue
 
