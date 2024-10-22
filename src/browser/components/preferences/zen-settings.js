@@ -4,18 +4,33 @@
 var gZenMarketplaceManager = {
   async init() {
     const checkForUpdates = document.getElementById('zenThemeMarketplaceCheckForUpdates');
-    if (!checkForUpdates) return; // We havent entered the settings page yet.
-    if (this.__hasInitializedEvents) return;
+    const header = document.getElementById('zenMarketplaceHeader');
+
+    if (!checkForUpdates || !header) {
+      return; // We haven't entered the settings page yet.
+    }
+
+    if (this.__hasInitializedEvents) {
+      return;
+    }
+
+    header.appendChild(this._initDisableAll());
+
     this.__hasInitializedEvents = true;
+
     await this._buildThemesList();
+
     Services.prefs.addObserver(this.updatePref, this);
-    var checkForUpdateClick = (event) => {
+
+    const checkForUpdateClick = (event) => {
       if (event.target === checkForUpdates) {
         event.preventDefault();
         this._checkForThemeUpdates(event);
       }
     };
+
     checkForUpdates.addEventListener('click', checkForUpdateClick);
+
     document.addEventListener('ZenThemeMarketplace:CheckForUpdatesFinished', (event) => {
       checkForUpdates.disabled = false;
       const updates = event.detail.updates;
@@ -29,6 +44,7 @@ var gZenMarketplaceManager = {
         error.hidden = false;
       }
     });
+
     window.addEventListener('unload', () => {
       Services.prefs.removeObserver(this.updatePref, this);
       this.__hasInitializedEvents = false;
@@ -38,6 +54,31 @@ var gZenMarketplaceManager = {
       this.themesList.innerHTML = '';
       this._doNotRebuildThemesList = false;
     });
+  },
+
+  _initDisableAll() {
+    const areThemesDisabled = Services.prefs.getBoolPref('zen.themes.disable-all', false);
+    const browser = ZenThemesCommon.currentBrowser;
+    const mozToggle = document.createElement('moz-toggle');
+
+    mozToggle.className = 'zenThemeMarketplaceItemPreferenceToggle zenThemeMarketplaceDisableAllToggle';
+    mozToggle.pressed = !areThemesDisabled;
+
+    browser.document.l10n.setAttributes(mozToggle, `zen-theme-disable-all-${!areThemesDisabled ? 'enabled' : 'disabled'}`);
+
+    mozToggle.addEventListener('toggle', async (event) => {
+      const { pressed = false } = event.target || {};
+
+      this.themesList.style.display = pressed ? '' : 'none';
+      Services.prefs.setBoolPref('zen.themes.disable-all', !pressed);
+      browser.document.l10n.setAttributes(mozToggle, `zen-theme-disable-all-${pressed ? 'enabled' : 'disabled'}`);
+    });
+
+    if (areThemesDisabled) {
+      this.themesList.style.display = 'none';
+    }
+
+    return mozToggle;
   },
 
   async observe() {
@@ -85,6 +126,8 @@ var gZenMarketplaceManager = {
     const themes = await ZenThemesCommon.getThemes();
     const theme = themes[themeId];
 
+    console.log(`[ZenThemeMarketplaceParent:settings]: Disabling theme ${theme.name}`);
+
     theme.enabled = false;
 
     await IOUtils.writeJSON(ZenThemesCommon.themesDataFile, themes);
@@ -95,6 +138,8 @@ var gZenMarketplaceManager = {
   async enableTheme(themeId) {
     const themes = await ZenThemesCommon.getThemes();
     const theme = themes[themeId];
+
+    console.log(`[ZenThemeMarketplaceParent:settings]: Enabling theme ${theme.name}`);
 
     theme.enabled = true;
 
@@ -109,7 +154,10 @@ var gZenMarketplaceManager = {
   },
 
   async _buildThemesList() {
-    if (!this.themesList) return;
+    if (!this.themesList) {
+      return;
+    }
+
     if (this._doNotRebuildThemesList) {
       this._doNotRebuildThemesList = false;
       return;
@@ -337,16 +385,21 @@ var gZenMarketplaceManager = {
             case 'checkbox': {
               const checkbox = window.MozXULElement.parseXULToFragment(`
                 <hbox class="zenThemeMarketplaceItemPreference">
-                  <checkbox class="zenThemeMarketplaceItemPreferenceCheckbox" label="${label}" tooltiptext="${property}" zen-pref="${property}"></checkbox>
+                  <checkbox class="zenThemeMarketplaceItemPreferenceCheckbox"></checkbox>
                 </hbox>
               `);
 
+              const checkboxElement = checkbox.querySelector('.zenThemeMarketplaceItemPreferenceCheckbox');
+              checkboxElement.setAttribute('label', label);
+              checkboxElement.setAttribute('tooltiptext', property);
+              checkboxElement.setAttribute('zen-pref', property);
+
               // Checkbox only works with "true" and "false" values, it's not like HTML checkboxes.
               if (Services.prefs.getBoolPref(property, false)) {
-                checkbox.querySelector('.zenThemeMarketplaceItemPreferenceCheckbox').setAttribute('checked', 'true');
+                checkboxElement.setAttribute('checked', 'true');
               }
 
-              checkbox.querySelector('.zenThemeMarketplaceItemPreferenceCheckbox').addEventListener('click', (event) => {
+              checkboxElement.addEventListener('click', (event) => {
                 const target = event.target.closest('.zenThemeMarketplaceItemPreferenceCheckbox');
                 const key = target.getAttribute('zen-pref');
                 const checked = target.hasAttribute('checked');
@@ -448,15 +501,6 @@ var gZenLooksAndFeel = {
     window.addEventListener('unload', () => {
       window.matchMedia('(prefers-color-scheme: dark)').removeListener(onPreferColorSchemeChange);
     });
-    setTimeout(() => {
-      const group = document.getElementById('zenLooksAndFeelGroup');
-      const webGroup = document.getElementById('webAppearanceGroup');
-      webGroup.style.display = 'none';
-      // Iterate reverse to prepend the elements in the correct order.
-      for (let child of [...webGroup.children].reverse()) {
-        group.prepend(child);
-      }
-    }, 500);
     this.setDarkThemeListener();
     this.setCompactModeStyle();
   },
@@ -626,9 +670,9 @@ var gZenWorkspacesSettings = {
         let buttonIndex = await confirmRestartPrompt(true, 1, true, true);
         if (buttonIndex == CONFIRM_RESTART_PROMPT_RESTART_NOW) {
           Services.startup.quit(Ci.nsIAppStartup.eAttemptQuit | Ci.nsIAppStartup.eRestart);
-        } 
-      }
-    }
+        }
+      },
+    };
     Services.prefs.addObserver('zen.workspaces.enabled', this);
     Services.prefs.addObserver('zen.tab-unloader.enabled', tabsUnloaderPrefListener);
     window.addEventListener('unload', () => {
@@ -689,19 +733,6 @@ var zenMissingKeyboardShortcutL10n = {
   goHome: 'zen-key-go-home',
   key_redo: 'zen-key-redo',
 };
-
-var zenKeycodeFixes = {
-  'Digit0': '0',
-  'Digit1': '1',
-  'Digit2': '2',
-  'Digit3': '3',
-  'Digit4': '4',
-  'Digit5': '5',
-  'Digit6': '6',
-  'Digit7': '7',
-  'Digit8': '8',
-  'Digit9': '9',
-}
 
 var gZenCKSSettings = {
   async init() {
@@ -869,7 +900,7 @@ var gZenCKSSettings = {
 
     // This is because on some OSs (windows/macos mostly) the key is not the same as the keycode
     // e.g. CTRL+ALT+3 may be displayed as the euro sign
-    let shortcut = zenKeycodeFixes[event.code] ?? event.key;
+    let shortcut = event.key;
 
     shortcut = shortcut.replace(/Ctrl|Control|Shift|Alt|Option|Cmd|Meta/, ''); // Remove all modifiers
 
@@ -1037,6 +1068,11 @@ Preferences.addAll([
   },
   {
     id: 'zen.workspaces.force-container-workspace',
+    type: 'bool',
+    default: true,
+  },
+  {
+    id: 'zen.workspaces.open-new-tab-if-last-unpinned-tab-is-closed',
     type: 'bool',
     default: true,
   },

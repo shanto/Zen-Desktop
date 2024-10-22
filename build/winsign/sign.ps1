@@ -10,13 +10,23 @@ git pull --recurse-submodules
 mkdir windsign-temp -ErrorAction SilentlyContinue
 
 # Download in parallel
+
+#show output too
+Start-Job -Name "DownloadGitObjectsRepo" -ScriptBlock {
+    param($PWD)
+    echo "Downloading git objects repo to $PWD\windsign-temp\windows-binaries"
+    git clone https://github.com/zen-browser/windows-binaries.git $PWD\windsign-temp\windows-binaries
+    echo "Downloaded git objects repo to"
+} -Verbose -ArgumentList $PWD -Debug
+
 gh run download $GithubRunId --name windows-x64-obj-specific -D windsign-temp\windows-x64-obj-specific
 echo "Downloaded specific artifacts"
 gh run download $GithubRunId --name windows-x64-obj-generic -D windsign-temp\windows-x64-obj-generic
 echo "Downloaded generic artifacts"
 
+Wait-Job -Name "DownloadGitObjectsRepo"
+
 mkdir engine\obj-x86_64-pc-windows-msvc\ -ErrorAction SilentlyContinue
-mkdir .\.github\workflows\object\ -ErrorAction SilentlyContinue
 
 pnpm surfer ci --brand alpha
 
@@ -87,8 +97,8 @@ function SignAndPackage($name) {
 
     echo "Invoking tar for $name"
     # note: We need to sign it into a parent folder, called windows-x64-signed-$name
-    rmdir .\.github\workflows\object\windows-x64-signed-$name -Recurse -ErrorAction SilentlyContinue
-    mv .\windsign-temp\windows-x64-signed-$name .\.github\workflows\object\windows-x64-signed-$name -Force
+    rmdir .\windsign-temp\windows-binaries\windows-x64-signed-$name -Recurse -ErrorAction SilentlyContinue
+    mv windsign-temp\windows-x64-signed-$name .\windsign-temp\windows-binaries -Force
 
     echo "Finished $name"
 }
@@ -98,9 +108,11 @@ SignAndPackage generic
 
 echo "All artifacts signed and packaged, ready for release!"
 echo "Commiting the changes to the repository"
-git add .\.github\workflows\object
+cd windsign-temp\windows-binaries
+git add .
 git commit -m "Sign and package windows artifacts"
 git push
+cd ..\..
 
 # Cleaning up
 

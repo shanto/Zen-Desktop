@@ -62,7 +62,7 @@
 }
 
 #context-zenSplitLink {
-  --menu-image: url('link.svg') !important;
+  --menu-image: url('split.svg') !important;
 }
 
 #sidebar-button:-moz-locale-dir(ltr):not([positionend]),
@@ -100,6 +100,10 @@
 
 #nav-bar-overflow-button {
   list-style-image: url('chevron.svg') !important;
+}
+
+#PanelUI-menu-button > * {
+  padding: var(--zen-toolbar-button-inner-padding);
 }
 
 #PanelUI-menu-button,
@@ -183,6 +187,11 @@
 #zen-sidebar-add-panel-button,
 #PanelUI-zen-workspaces-new image {
   list-style-image: url('plus.svg') !important;
+}
+
+#PanelUI-zen-workspaces-reorder-mode image {
+  list-style-image: url('move-tab.svg') !important;
+  rotate: 90deg;
 }
 
 #cut-button {
@@ -362,6 +371,10 @@
   list-style-image: url('arrow-down.svg') !important;
 }
 
+.zen-workspace-actions-reorder-icon {
+  list-style-image: url('drag-indicator.svg') !important;
+}
+
 #protections-popup-mainView .subviewbutton-nav:not(.notFound)::after,
 #identity-popup-mainView .subviewbutton-nav::after,
 .widget-overflow-list .subviewbutton-nav::after,
@@ -404,7 +417,7 @@
 }
 
 #zen-split-views-button {
-  list-style-image: url('link.svg') !important;
+  list-style-image: url('split.svg') !important;
   fill: var(--toolbarbutton-icon-fill-attention);
   fill-opacity: 1;
 }
