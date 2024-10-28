@@ -9,7 +9,7 @@
   --urlbarView-separator-color: var(--zen-colors-border);
   --urlbarView-hover-background: var(--toolbarbutton-hover-background);
   --urlbarView-highlight-background: var(--toolbarbutton-hover-background);
-  border: 1px solid var(--zen-colors-border);
+  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
   border-radius: var(--toolbarbutton-border-radius);
   overflow: hidden;
   padding: 1px;
@@ -28,11 +28,16 @@
 }
 
 #urlbar-background {
-  background: transparent;
+  background: var(--zen-dialog-background);
 }
 
 #urlbar[focused='true'] > #urlbar-background {
   background: var(--zen-dialog-background) !important;
+}
+
+#urlbar:not([focused='true']):not([breakout-extend="true"]) > #urlbar-background {
+  background: color-mix(in srgb, light-dark(#fff, var(--zen-colors-secondary)) 65%, transparent 35%) !important;
+  backdrop-filter: blur(10px);
 }
 
 #urlbar-background {
@@ -84,7 +89,7 @@
   padding-inline-start: 8px !important;
 }
 
-#identity-box[pageproxystate="invalid"].chromeUI #identity-icon {
+#identity-box:not([pageproxystate="invalid"]).chromeUI #identity-icon {
   display: none;
 }
 

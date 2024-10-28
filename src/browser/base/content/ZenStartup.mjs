@@ -5,7 +5,7 @@
     init() {
       this.logHeader();
       this.openWatermark();
-      window.SessionStore.promiseInitialized.then(async () => {
+      window.SessionStore.promiseInitialized.then(() => {
         this._changeSidebarLocation();
         this._zenInitBrowserLayout();
         this._initSearchBar();
@@ -46,6 +46,8 @@
           'zen.theme.content-element-separation',
           0
         );
+
+        document.l10n.setAttributes(document.getElementById('tabs-newtab-button'), 'tabs-toolbar-new-tab');
 
         function throttle(f, delay) {
           let timer = 0;
@@ -119,7 +121,7 @@
       }
 
       // remove all styles except for the width, since we are xulstoring the complet style list
-      const width = toolbox.style.width;
+      const width = toolbox.style.width || '250px';
       toolbox.removeAttribute('style');
       toolbox.style.width = width;
 

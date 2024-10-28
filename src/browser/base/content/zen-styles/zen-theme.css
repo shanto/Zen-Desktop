@@ -62,6 +62,7 @@
   --in-content-button-text-color: var(--zen-secondary-btn-color) !important;
 
   --toolbarbutton-icon-fill-attention: var(--zen-primary-color) !important;
+  --toolbarbutton-icon-fill: light-dark(rgb(57, 57, 58), rgb(251, 251, 254)) !important;
 
   --button-primary-bgcolor: var(--in-content-primary-button-background) !important;
   --button-primary-hover-bgcolor: var(--in-content-primary-button-background-hover) !important;

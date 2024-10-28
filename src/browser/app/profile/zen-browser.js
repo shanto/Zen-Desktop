@@ -75,12 +75,15 @@ pref('zen.welcomeScreen.enabled', true);
 pref('zen.welcomeScreen.seen', false);
 pref('zen.tabs.vertical', true);
 pref('zen.tabs.vertical.right-side', false);
+pref('zen.tabs.show-newtab-under', false);
 pref('zen.theme.accent-color', "#aac7ff");
-pref('zen.theme.border-radius', 5); // In pixels
+pref('zen.theme.border-radius', 8); // In pixels
 pref('zen.theme.content-element-separation', 6); // In pixels
 pref('zen.theme.toolbar-themed', true);
 pref('zen.theme.pill-button', false);
+pref('zen.theme.gradient', true);
 pref('zen.view.compact', false);
+pref('zen.view.experimental-rounded-view', true);
 
 pref('zen.theme.color-prefs.amoled', false);
 pref('zen.theme.color-prefs.colorful', false);
@@ -91,10 +94,12 @@ pref('zen.view.compact.toolbar-flash-popup', true);
 pref('zen.view.compact.toolbar-flash-popup.duration', 800);
 pref('zen.view.compact.toolbar-hide-after-hover.duration', 1000);
 
+pref('zen.glance.activation-method', 'ctrl'); // ctrl, alt, shift, none, hold
+pref('zen.glance.hold-duration', 300); // in ms
+
 pref('zen.view.sidebar-height-throttle', 200); // in ms
-pref('zen.view.sidebar-expanded', false);
+pref('zen.view.sidebar-expanded', true);
 pref('zen.view.sidebar-expanded.on-hover', false);
-pref('zen.view.sidebar-expanded.show-button', true);
 pref('zen.view.sidebar-expanded.max-width', 400);
 
 pref('zen.view.show-bottom-border', false);
@@ -123,6 +128,7 @@ pref('zen.pinned-tab-manager.close-shortcut-behavior', 'switch');
 pref('zen.sidebar.data', "{\"data\":\n {\"p1\":{\n   \"url\":\"https://www.wikipedia.org/\"\n  },\n\"p2\":{\n   \"url\":\"https://m.twitter.com/\",\n\"ua\": true\n  },\n\"p3\": {\n   \"url\": \"https://www.youtube.com/\",\n\"ua\": true\n},\n\"p4\": {\n   \"url\": \"https://translate.google.com/\",\n\"ua\": true\n},\n\"p5\": {\n   \"url\": \"https://todoist.com/\",\n\"ua\": true\n}},\n\"index\":[\"p1\",\"p2\",\"p3\",\"p4\",\"p5\"]}");
 pref('zen.sidebar.enabled', true);
 pref('zen.sidebar.close-on-blur', true);
+pref('zen.sidebar.max-webpanels', 8);
 
 // Zen Split View
 pref('zen.splitView.working', false);
@@ -240,7 +246,3 @@ pref("network.fetchpriority.enabled", true);
 // No Proxy should be default, Use system proxy allows antivirus, virus or system proxy to MITM or slowing down Zen
 pref("network.proxy.type", 0);
 
-// ZEN EXPERIMENTAL:
-
-pref("security.tls.enable_kyber", true);
-pref("network.http.http3.enable_kyber", true);

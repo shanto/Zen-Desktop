@@ -63,6 +63,12 @@ jobs:
         run: |
           git config --global core.safecrlf false  
           pnpm surfer download
+
+      - name: Import patches
+        env:
+          SURFER_NO_BRANDING_PATCH: true
+        run: pnpm surfer import 
+
       - name: Generate
         run: |
           ls

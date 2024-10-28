@@ -1,5 +1,4 @@
 <script src="chrome://browser/content/zen-components/ZenThemeBuilder.mjs" defer=""/>
-<script src="chrome://browser/content/zen-components/ZenGradientGenerator.mjs" defer=""/>
 <script src="chrome://browser/content/preferences/zen-settings.js"/>
 <html:template id="template-paneZenLooks">
 <hbox id="zenLooksCategory"
@@ -288,9 +287,9 @@
       <label><html:h2 data-l10n-id="zen-vertical-tabs-header"/></label>
       <description class="description-deemphasized" data-l10n-id="zen-vertical-tabs-description" />
 
-      <checkbox id="zenLooksAndFeelShowTabExpandButton"
-            data-l10n-id="zen-vertical-tabs-show-expand-button"
-            preference="zen.view.sidebar-expanded.show-button"/>
+      <checkbox id="zenLooksAndFeelNewtabUnderLastTab"
+            data-l10n-id="zen-vertical-tabs-newtab-under-last-tab"
+            preference="zen.tabs.show-newtab-under"/>
     <hbox class="indent">
         <checkbox id="zenLooksAndFeelShowBottomBorder"
                 data-l10n-id="zen-vertical-tabs-show-bottom-border"

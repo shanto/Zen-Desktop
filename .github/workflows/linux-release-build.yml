@@ -96,6 +96,12 @@ jobs:
       - name: Download firefox source and dependencies
         run: pnpm surfer download
 
+      - name: Fix rust version
+        run: |
+          # Install a rust version compatible with LLVM 18
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.79
+          source $HOME/.cargo/env
+
       - name: Import
         env:
           SURFER_COMPAT: ${{ matrix.generic == true }}

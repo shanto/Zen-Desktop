@@ -13,6 +13,27 @@
   }
 }
 
+@keyframes zen-theme-picker-dot-animation {
+  from {
+    transform: scale(0.8) translate(-50%, -50%);
+  }
+  50% {
+    transform: scale(1.2) translate(-50%, -50%);
+  }
+  to {
+    transform: scale(1) translate(-50%, -50%);
+  }
+}
+
+@keyframes zen-main-app-wrapper-animation {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes zen-jello-out-animation {
   0% {
     transform: scale3d(1, 1, 1);
@@ -56,26 +77,63 @@
   }
 }
 
-@keyframes zen-sidebar-panel-animation {
+@keyframes better-sidebar-pinned-hide {
   0% {
-    opacity: 0;
-    transform: scale3d(0.9, 0.9, 0.9);
+    opacity: 1;
+    transform: scale(1) rotateX(0deg);
   }
 
   100% {
-    opacity: 1;
-    transform: scale3d(1, 1, 1);
+    transform: scale(0.99) rotateX(-5deg);
+    opacity: 0;
   }
 }
 
-@keyframes zen-sidebar-panel-animation-2 {
+@keyframes better-sidebar-pinned-show {
   0% {
-    opacity: 1;
-    transform: translateX(-50px);
+    opacity: 0;
+
+    transform: scale(0.99) rotateX(-5deg);
   }
 
   100% {
-    transform: translateX(0);
+    transform: scale(1) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes better-sidebar-hide {
+  0% {
+    opacity: 1;
+
+    transform: scale(1) rotateX(0deg);
+  }
+
+  100% {
+    transform: scale(0.99) rotateX(-5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes better-sidebar-show {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes better-sidebar-intro-show {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  100% {
+    transform: translateY(0px);
     opacity: 1;
   }
 }
@@ -153,5 +211,18 @@
 
   to {
     right: -2px;
+  }
+}
+
+/* Mark: Zen Glance */
+@keyframes zen-glance-overlay-animation {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

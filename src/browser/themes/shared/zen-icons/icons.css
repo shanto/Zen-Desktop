@@ -43,7 +43,8 @@
 
 #stop-button,
 .close-icon,
-#zen-sidebar-web-panel-close {
+#zen-sidebar-web-panel-close,
+.zen-theme-picker-custom-list-item-remove {
   list-style-image: url('close.svg') !important;
 }
 
@@ -164,7 +165,8 @@
   --menu-image: url('bookmark-hollow.svg') !important;
 }
 
-#context_zenEditWorkspace {
+#context_zenEditWorkspace,
+#zenToolbarThemePicker {
   --menu-image: url('edit.svg') !important;
 }
 
@@ -185,7 +187,8 @@
 #appMenu-zoomEnlarge-button2,
 #PanelUI-zen-profiles-newProfile,
 #zen-sidebar-add-panel-button,
-#PanelUI-zen-workspaces-new image {
+#PanelUI-zen-workspaces-new image,
+#PanelUI-zen-gradient-generator-color-custom-add image {
   list-style-image: url('plus.svg') !important;
 }
 

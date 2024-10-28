@@ -497,7 +497,6 @@ var gZenLooksAndFeel = {
     var onPreferColorSchemeChange = this.onPreferColorSchemeChange.bind(this);
     window.matchMedia('(prefers-color-scheme: dark)').addListener(onPreferColorSchemeChange);
     this.onPreferColorSchemeChange();
-    this.themePicker = new ZenThemePicker(document.getElementById('zenLooksAndFeelGradientPickerParent'));
     window.addEventListener('unload', () => {
       window.matchMedia('(prefers-color-scheme: dark)').removeListener(onPreferColorSchemeChange);
     });
@@ -626,7 +625,7 @@ var gZenLooksAndFeel = {
           case 'hover':
             disableCompactTabbar();
             Services.prefs.setBoolPref(onHoverPref, true);
-            Services.prefs.setBoolPref(defaultExpandPref, true);
+            Services.prefs.setBoolPref(defaultExpandPref, false);
             break;
         }
       });
@@ -1002,11 +1001,6 @@ Preferences.addAll([
     default: true,
   },
   {
-    id: 'zen.view.sidebar-expanded.show-button',
-    type: 'bool',
-    default: true,
-  },
-  {
     id: 'zen.view.sidebar-expanded',
     type: 'bool',
     default: true,
@@ -1076,4 +1070,9 @@ Preferences.addAll([
     type: 'bool',
     default: true,
   },
+  {
+    id: 'zen.tabs.show-newtab-under',
+    type: 'bool',
+    default: false,
+  }
 ]);

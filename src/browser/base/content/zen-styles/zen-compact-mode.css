@@ -49,10 +49,11 @@
       }
 
       #titlebar {
-        background: var(--zen-themed-toolbar-bg) !important;
-        box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.1);
-        border-radius: calc(var(--zen-border-radius) + 2px);
-        border: 1px solid var(--zen-colors-border);
+        background: var(--zen-main-browser-background) !important;
+        background-attachment: fixed !important;
+        background-size: 2000px !important; /* Dont ask me why */
+        box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.2);
+        border-radius: var(--zen-border-radius);
         padding: var(--zen-toolbox-padding) !important;
         position: relative;
       }
@@ -60,6 +61,11 @@
       #zen-tabbox-wrapper > #navigator-toolbox:not(#navigator-toolbox:is(#navigator-toolbox[zen-expanded='true'])) {
         max-width: calc(var(--zen-toolbox-max-width) + var(--zen-compact-float)) !important;
         min-width: calc(var(--zen-toolbox-max-width) + var(--zen-compact-float)) !important;
+
+        & #titlebar {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
       }
 
       @media (-moz-bool-pref: 'zen.view.compact.hide-toolbar') {
@@ -106,27 +112,23 @@
       }
 
       #zen-appcontent-navbar-container {
+        --zen-compact-toolbar-offset: 5px;
         position: absolute;
         top: 0;
         transform: translateY(calc(-100% + var(--zen-element-separation) + 1px));
-        left: 0;
+        left: calc(var(--zen-element-separation) + var(--zen-compact-toolbar-offset));
         z-index: 10;
-        background: var(--zen-themed-toolbar-bg);
-        box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.3) !important;
         border-bottom-left-radius: var(--zen-border-radius);
         border-bottom-right-radius: var(--zen-border-radius);
-        border: 1px solid var(--zen-colors-border);
-        border-top-width: 0px;
         transition: all 0.1s ease-in-out;
-        width: 100%;
+        width: calc(100% - ((var(--zen-element-separation) + var(--zen-compact-toolbar-offset)) * 2));
         opacity: 0;
 
-        :root[tabsintitlebar][sizemode='normal']:not([gtktiledwindow='true']) & {
-          border-top-left-radius: env(-moz-gtk-csd-titlebar-radius);
-          border-top-right-radius: env(-moz-gtk-csd-titlebar-radius);
-          border-left-width: 0;
-          border-right-width: 0;
-        }
+        background-attachment: fixed;
+        backdrop-filter: blur(5px);
+        background: var(--zen-main-browser-background);
+        background-size: 100% 2000px;
       }
 
       #zen-appcontent-navbar-container:hover,

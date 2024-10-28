@@ -32,12 +32,6 @@
   }
 }
 
-@media not (-moz-bool-pref: 'zen.view.sidebar-expanded.show-button') {
-  #zen-expand-sidebar-button {
-    display: none !important;
-  }
-}
-
 /*#zen-profile-button::before {
   background: transparent;
   border-radius: 50%;
